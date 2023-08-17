@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>메인</title>
+    <link rel="stylesheet" href="../css/layout.css" />
+    <script
+      src="https://code.jquery.com/jquery-3.7.0.min.js"
+      integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g="
+      crossorigin="anonymous"
+    ></script>
+    <!-- 시연할때 길 바람 무제 자화상 -->
+  </head>
+  <body>
+    <header>
+      <h1>온라인 서울시립미술관</h1>
+    </header>
+    <div class="totalbox">
+      <span>의 작품을 보유하고 있습니다.</span>
+    </div>
+    <div class="search-box">
+      <input type="text" id="input" />
+      <div class="btns">
+        <button id="btnSearch">검색</button>
+        <button id="btnfresh">재검색</button>
+      </div>
+    </div>
+    <div class="current-search"></div>
+    <div class="card"></div>
+    <script>
+      $(document).ready(function () {
+        // 작품의 총 갯수를 뿌려주는 함수
+        function loadData() {
+          $.ajax({
+            method: "GET",
+            url: "http://openapi.seoul.go.kr:8088/70664e4262647564343658564e6152/json/SemaPsgudInfoKorInfo/1/1000/",
+            // ajax 연결이 되면 success 핸들러의 함수 실행
+            success: function (data) {
+              const total = data.SemaPsgudInfoKorInfo.list_total_count;
+              $(".totalbox").prepend(`<span>${total}</span>`);
+            },
+          });
+        }
+        loadData();
+        // 검색시켜주는 함수
+        function Search() {
+          let input = $("#input").val();
+          $.ajax({
+            method: "GET",
+            url: "http://openapi.seoul.go.kr:8088/70664e4262647564343658564e6152/json/SemaPsgudInfoKorInfo/1/1000/",
+            success: function (data) {
+              const rows = data.SemaPsgudInfoKorInfo.row;
+              for (let i = 0; i < rows.length; i++) {
+                let painting = rows[i].thumb_image;
+                let year = rows[i].mnfct_year;
+                let artist = rows[i].writr_nm;
+                let category = rows[i].prdct_cl_nm;
+                let name = rows[i].prdct_nm_korean;
+                let size = rows[i].prdct_stndrd;
+                let tech = rows[i].matrl_technic;
+                let detail = rows[i].prdct_detail;
+                if (input == name) {
+                  $(".card").append(
+                    `<div class=card-item>
+                        <div class="img-box">
+                          <img src=${painting}>
+                        </div>
+                        <div class="info-box">
+                          <p>${name}</p>
+                          <p>${artist} 작가</p>
+                          <p>${category}</p>
+                          <p>${year}作</p>
+                          <p>작품규격 : ${size}</p>
+                          <p>재료기법 : ${tech}</p>
+                          <p>작품설명 : ${detail}</p>
+                        <div>
+                      </div>`
+                  );
+                }
+              }
+              let currentSearch = $(".card-item").length;
+              $(".current-search").append(`<p>검색결과 : ${currentSearch}<p>`);
+            },
+          });
+        }
+        // 버튼 클릭 시 검색 함수 실행
+        $("#btnSearch").on("click", Search);
+
+        // 재검색 버튼 클릭 시 .card 내 div 삭제
+        function fresh() {
+          $(".card").find("div").remove();
+          $(".card").find("p").remove();
+          $(".current-search").text(""); // 텍스트만 삭제
+        }
+        $("#btnfresh").on("click", fresh);
+      });
+    </script>
+  </body>
+</html>
