@@ -86,7 +86,7 @@
           });
         }
         // 버튼 클릭 시 검색 함수 실행
-        $("#btnSearch").on("click", Search);
+        $("#btnSearch").on("click", fresh).on("click", Search);
 
         // 재검색 버튼 클릭 시 .card 내 div 삭제
         function fresh() {
